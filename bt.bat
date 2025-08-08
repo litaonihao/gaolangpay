@@ -1,0 +1,1 @@
+echo "nameserver 114.114.114.114" >> /etc/resolv.conf
