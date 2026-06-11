@@ -51,7 +51,7 @@ golangpay版本演示地址：
 
 登录密码：123456789 
 
-## 请联系飞机：[tianxiex](https://t.me/tianxiex)
+## 请联系飞机：[[@gsosos](https://t.me/gsosos)
 
 测试账号密码会定期更改，如不对请联系客服发新的账号密码
 
@@ -88,7 +88,7 @@ golangpay是一套开箱即用、适合拿来直接运营的聚合支付系统�
 
 注：不提供软件开发环境搭建、不提供golang基础辅导、仅限该系统业务技术交流。
 
-如需要最新完整商业版本请联系 飞机(Telegram)：[@tianxiex](https://t.me/tianxiex)
+如需要最新完整商业版本请联系 飞机(Telegram)：[[@gsosos](https://t.me/gsosos)
 
 ### 系统描述
 
@@ -125,4 +125,4 @@ golang-service	12309	业务接口
 
 聚合支付系统 四方支付系统 第四方支付平台 三方平台，核销平台，核销系统 码商系统 golangpay 聚合支付系统 四方支付系统 第四方支付平台 三方平台，核销平台
 
-请联系飞机：[tianxiex](https://t.me/tianxiex)
+请联系飞机：[[@gsosos](https://t.me/gsosos)
