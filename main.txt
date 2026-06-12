@@ -1,0 +1,1473 @@
+let bz = 0
+let bzz = 0
+let az = 0
+let as = 0
+let jc = 0
+let sj = 0
+let ys = 0
+let cs = 0
+let ss = 0
+let ladan = 0
+let countsize = 0
+let linkon = 0
+let data1
+let data2
+let uidip
+let data3
+let successlink
+let contenttime = 100
+
+function main() {
+
+    ck_dk()   //开启日志
+    image.initOpenCV()
+    if (!autoServiceStart(3)) {
+        logw("自动化服务启动失败，无法执行脚本")
+        exit();
+        return;
+    }
+    //km()
+//    initEnv()
+    initOcrLite()
+
+    device.keepScreenOn()
+    let zdh = daemonEnv(true)
+    logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "开始执行脚本...")
+    utils.openApp("com.taobao.taobao")
+
+    while (true) {
+        if (readConfigString("one")) {
+               let vrcode=yanzheng(readConfigString("lj1"))
+
+
+
+                  logd("网络链接"+vrcode);
+              if (vrcode==false) {
+
+                logw("网络链接错误"+vrcode);
+              sleep(10000)
+               }else{
+
+                    wb_fg(readConfigString("lj1"),vrcode.data.ID)
+                  contenttime=vrcode.data.content
+                 logw("网络链接时间"+vrcode.data.content);
+                    if (linkon==1) {
+                        logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "当前没有链接")
+                         sleep(Math.random() * contenttime + 7000);
+                    }else{
+                      if (successlink ==1){
+                             sleep(Math.random() * contenttime + 6000);
+                              logd("没有店铺链接地址")
+
+                            }else{
+                              tb_gjc(data2,vrcode.data.ID,uidip)
+                            }
+                    }
+
+        }
+
+
+        }
+
+         sleep(Math.random() * contenttime + 400);
+    }
+    closeLogWindow();
+    sleep(5000);
+    logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "结束脚本执行")
+}
+
+function initOcrLite() {
+    let ocrLiteMap = {"type": "ocrLite", "numThread": 1, "padding": 10, "maxSideLen": 0}
+    //创建ocr对象,仅脚本开头一次即可
+    ocrLite = ocr.newOcr()
+    //初始化ocr,仅脚本开头一次即可
+    if (!ocrLite.initOcr(ocrLiteMap)) {
+        loge("OCR初始化失败 : " + ocrLite.getErrorMsg())
+        exit()
+    }
+}
+
+function yanzheng(uid){
+
+ var urlv ="http://d3.qixianmusic.com/api/v1/on?uid="+uid;
+          var response = http.httpGetDefault(urlv, 5 * 1000, ""); // 发起 HTTP GET 请求
+
+console.log(urlv)
+             if (response) {
+                 try {
+                     var list = JSON.parse(response); // 将返回的字符串解析为 JSON 对象
+                      logd("获取店铺名称="+list);
+                     return list; // 返回解析后的 JSON 数据
+                 } catch (e) {
+                     console.error("解析 JSON 失败: ", e);
+                     return false; // 如果解析失败，返回 null
+                 }
+                 return true;
+             } else {
+
+                 return false;
+//                  console.error("HTTP 请求失败验证，未获取到数据");
+             }
+}
+
+
+
+function ladanlist(name,userid){  //拉单
+//logd("拉单地点")
+//logd(userid)
+ var url ="http://d3.qixianmusic.com/api/v1/shuadan/"+name+"/"+userid+"";
+ logd(url)
+          var response = http.httpGetDefault(url, 5 * 1000, ""); // 发起 HTTP GET 请求
+//             logd(response)
+//             if (response) {
+             if (response) {
+                 try {
+                     var list = JSON.parse(response); // 将返回的字符串解析为 JSON 对象
+
+                 if (list && list.data && list.data.length > 0) {
+
+                     logd("加载拉单链接"+list.data[0].success)
+                                shangchuan(name,list.data[0].ID)
+                                return [list.data[0].dianlink, list.data[0].ID, list.data[0].success];
+                            } else {
+                                console.error("返回的数据格式不正确或数据为空");
+                                return false;
+                            }
+                 } catch (e) {
+                     console.error("解析 JSON 失败: ", e);
+                     return false; // 如果解析失败，返回 null
+                 }
+             } else {
+                 console.error("HTTP 请求失败，未获取到数据");
+               return false; 
+
+             }
+
+}
+
+
+function shangchuan(name,id){
+ var url ="http://d3.qixianmusic.com/api/v1/stateup/"+id+"/"+name+"";
+          var response = http.httpGetDefault(url, 5 * 1000, ""); // 发起 HTTP GET 请求
+//      logd(url);
+             if (response) {
+                 try {
+                     var list = JSON.parse(response); // 将返回的字符串解析为 JSON 对象
+                     return list; // 返回解析后的 JSON 数据
+                 } catch (e) {
+                     console.error("解析 JSON 失败: ", e);
+                     return null; // 如果解析失败，返回 null
+                 }
+             } else {
+                 console.error("HTTP 请求失败，未获取到数据");
+                 return null; // 如果请求失败，返回 null
+             }
+
+}
+
+function shangchuansuccess(userid,uidip){
+ var url ="http://d3.qixianmusic.com/api/v1/listshaudan/"+userid+"/"+uidip+"";
+          var response = http.httpGetDefault(url, 5 * 1000, ""); // 发起 HTTP GET 请求
+      logd(url);
+             if (response) {
+                 try {
+                     var list = JSON.parse(response); // 将返回的字符串解析为 JSON 对象
+                     return list; // 返回解析后的 JSON 数据
+                 } catch (e) {
+                     console.error("解析 JSON 失败: ", e);
+                     return null; // 如果解析失败，返回 null
+                 }
+             } else {
+                 console.error("HTTP 请求失败，未获取到数据");
+                 return null; // 如果请求失败，返回 null
+             }
+
+}
+
+
+function km() {
+    let km = Ssdun.卡密验证(readConfigString("km"), device.tcDeviceId(), "3176")
+    if (!km === 0) {
+        logw("卡密错误")
+        device.vibrate(3 * 1000)
+        exit()
+    }
+}
+
+function wb_fg(name,userid) {
+let falselink = ladanlist(name,userid)
+
+if (falselink == false){
+linkon=1
+}else{
+
+ let [dianlink, uid ,suclink]= ladanlist(name,userid)
+linkon=0
+   logi("换回的id"+uidip);
+
+    if (dianlink) {
+        data2 = dianlink
+        uidip  = uid
+        successlink =suclink
+    }
+    }
+}
+
+function qr_sh() {
+   logd(readConfigString("one"))
+    logd(readConfigString("two"))
+    logd(readConfigString("three"))
+    if (bz === 0) {
+
+        let node = bounds(894, 2118, 1050, 2274).getOneNodeInfo(0)
+        if (node) {
+            logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "我的淘宝")
+            sleep(Math.random() * contenttime + 400);
+            node.click()
+            sleep(1000)
+            bz = 1
+        }
+    }
+    if (bz === 1) {
+        let node = desc("待收货").clz("android.view.View").getOneNodeInfo(0)
+        if (node) {
+            logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "进入待收货")
+            sleep(Math.random() * contenttime + 400);
+            node.click()
+            sleep(1000)
+            bz = 2
+        }
+    }
+    if (bz === 2) {
+        let node = desc("确认收货").clz("android.view.View").getOneNodeInfo(0)
+        if (node) {
+            logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "确认收货")
+             sleep(Math.random() * contenttime + 400);
+            node.click()
+            sleep(2000)
+            bz = 3
+        } else {
+            sleep(500);
+            swipeToPoint(200, device.getScreenHeight() - 300, 200, device.getScreenHeight() - 600, 1000)
+            sleep(1000);
+        }
+    }
+    if (bz === 3) {
+        let node = desc("确定").drawingOrder("1").getOneNodeInfo(0)
+        if (node) {
+            logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "确定")
+            sleep(Math.random() * contenttime + 400);
+            node.click()
+            sleep(3000)
+            bz = 4
+        }
+    }
+    if (bz === 4) {
+        let node = text("手机淘宝").clz("android.widget.TextView").getOneNodeInfo(0)
+        if (node) {
+            logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "交易成功")
+            bz = 1000
+        }
+    }
+    if (bz === 1000) {
+        let node = desc("我的淘宝").clz("android.widget.FrameLayout").getOneNodeInfo(0)
+        if (node) {
+            logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "回到主页")
+            bz = 0
+        } else {
+             sleep(Math.random() * contenttime + 700);
+            back()
+            sleep(1000)
+        }
+    }
+}
+
+function ewm_dd() {
+    if (bz === 0) {
+        let node = clz("android.widget.FrameLayout").desc("搜索栏").getOneNodeInfo(0)
+        if (node) {
+            logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "输入关键词")
+            data1 = ""
+            data1 = file.readLine(readConfigString("lj3"), 1);
+            logd(data1 + "")
+            sleep(100);
+            node.click()
+            sleep(1500);
+            let bitmap = image.readBitmap(data1)
+            let fh = utils.decodeQRCode(bitmap)
+            logd(fh)
+            pasteText(id("com.taobao.taobao:id/searchEdit"), fh)
+            sleep(1000);
+            bz = 1
+        }
+    }
+    if (bz === 1) {
+        node = text("搜索").id("com.taobao.taobao:id/searchbtn").getOneNodeInfo(0)
+        if (node) {
+            logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "搜索")
+             sleep(Math.random() * contenttime + 400);
+            node.click()
+            sleep(2000);
+            bz = 2
+        }
+    }
+    if (bz === 2) {
+        let node = text("提交订单").clz("android.view.View").getOneNodeInfo(0)
+        if (node) {
+            logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "第" + (cs + 1) + "提交订单")
+             sleep(Math.random() * contenttime + 400);
+            node.click()
+            sleep(1000)
+            bz = 3
+        }
+    }
+    if (bz === 3) {
+        let node = desc("退出").clz("android.widget.FrameLayout").getOneNodeInfo(0)
+        if (node) {
+            logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "第" + (cs + 1) + "提交订单")
+             sleep(Math.random() * contenttime + 400);
+            node.click()
+            sleep(1000)
+            logw("请确认订单并手动支付！！！")
+            bz = 4
+        }
+    }
+    if (bz === 5) {
+        node = text("订阅").clz("android.widget.TextView").getOneNodeInfo(0)
+        if (node) {
+            bz = 0
+            logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "回到主页")
+        } else {
+            sleep(1000)
+            back()
+            sleep(1000)
+        }
+    }
+
+}
+
+function tb_gjc(url,userid,uidip) {    //开始拉单
+logd("断点"+uidip)
+//logd(userid)
+    let node = clz("android.widget.FrameLayout").desc("搜索").getOneNodeInfo(6000)
+    if (node) {
+        logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "点击搜索")
+        sleep(3000);
+//        node.click()
+////        swipe(id("nc_1_n1z"), node.bounds.right, node.bounds.top, 200)
+//        sleep(3000);
+//        ladan =1
+
+
+                    let centerX = (node.bounds.right - node.bounds.left) / 2 + node.bounds.left;
+                    let centerY = (node.bounds.bottom - node.bounds.top) / 2 + node.bounds.top;
+                    let width = node.bounds.right - node.bounds.left;
+                    let height = node.bounds.bottom - node.bounds.top;
+                    let randomOffsetX = (Math.random() * 0.2 - 0.1) * width;  // -10% to +10%
+                    let randomOffsetY = (Math.random() * 0.2 - 0.1) * height; // -10% to +10%
+
+                    // Apply the random offset
+                    let targetX = centerX + randomOffsetX;
+                    let targetY = centerY + randomOffsetY;
+                    sleep(Math.random() * 400 + 100);
+                    let result = clickPoint(targetX, targetY, Math.random() * 250 + 50);
+
+                    if (result) {
+                        toast("点击成功");
+                        ladan = 1;
+                        sleep(Math.random() * 700 + 300);
+                    } else {
+                        toast("点击失败");
+
+                        // Longer random delay after failure (500-1500ms)
+                        sleep(Math.random() * 1000 + 500);
+                    }
+
+
+    }else{
+sleep(3000)
+back()
+    }
+if (ladan === 1){
+  node = clz("android.widget.RelativeLayout").id("com.taobao.taobao:id/search_bar_wrapper").getOneNodeInfo(6000)
+    if (node) {
+     sleep(Math.random() * contenttime + 2000);
+        logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "删除"+contenttime)
+        node.click();
+        sleep(3000);
+
+      node = clz("android.widget.TextView").id("com.taobao.taobao:id/edit_del_btn").getOneNodeInfo(6000)
+        if (node) {
+            logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "输入内容")
+            node.click();
+            sleep(3000);
+            ladan=2
+        }
+        }
+}
+
+
+if (ladan ===2){
+
+   node = clz("android.widget.EditText").id("com.taobao.taobao:id/searchEdit").getOneNodeInfo(6000)
+        if (node) {
+            logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "输入内容"+contenttime)
+
+            sleep(3000);
+             var selectors = clz("android.widget.EditText");
+            var result = pasteText(selectors, url);
+               if (result) {
+                  ladan=3
+                   sleep(Math.random() * contenttime + 2000);
+               } else {
+                   toast("否");
+               }
+            sleep(4000);
+        }else{
+        sleep(1000)
+        back()
+        sleep(1000)
+        }
+}
+
+
+
+if (ladan ===3){
+ let randomDelay = Math.random() * 1000 + 1000;
+  node = clz("android.widget.Button").id("com.taobao.taobao:id/searchbtn").getOneNodeInfo(randomDelay)
+ sleep(Math.random() * contenttime + 700);
+                  if (node) {
+                  sleep(3000);
+                  let centerX = (node.bounds.right - node.bounds.left) / 2 + node.bounds.left;
+                  let centerY = (node.bounds.bottom - node.bounds.top) / 2 + node.bounds.top;
+                  let width = node.bounds.right - node.bounds.left;
+                  let height = node.bounds.bottom - node.bounds.top;
+                  let randomOffsetX = (Math.random() * 0.2 - 0.1) * width;  // -10% to +10%
+                  let randomOffsetY = (Math.random() * 0.2 - 0.1) * height; // -10% to +10%
+
+                  // Apply the random offset
+                  let targetX = centerX + randomOffsetX;
+                  let targetY = centerY + randomOffsetY;
+                  sleep(Math.random() * 400 + 100);
+                  let result = clickPoint(targetX, targetY, Math.random() * 250 + 50);
+
+                  if (result) {
+//                      toast("点击成功");
+                      ladan = 4;
+
+                      // Random delay after success (300-1000ms)
+                      sleep(Math.random() * 700 + 300);
+                  } else {
+//                      toast("点击失败");
+
+                      // Longer random delay after failure (500-1500ms)
+                      sleep(Math.random() * 1000 + 500);
+                  }
+
+
+
+                  }
+
+
+
+
+  }
+
+
+if (ladan ===4){
+    sleep(2000);
+    node = clz("android.widget.LinearLayout").desc("立即购买").getOneNodeInfo(6000)
+                  if (node) {
+                      logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "点击立即购买"+contenttime)
+                      sleep(Math.random() * contenttime + 2000);
+                      node.click();  
+                      sleep(1000);
+                    if (readConfigString("mark") == ""){
+                    ladan =5
+                    }else{
+                    logi("点击sku名称"+readConfigString("mark"))
+                     sleep(10000);
+                   skutupian(readConfigString("mark"))
+//                   ladan=5
+                    sleep(10000);
+
+                    }
+
+
+                  }else{
+                  logi("点击立即购买失败")
+                  ladan =5
+                  sleep(10000);
+                  }
+    }
+
+    if (ladan ===5){
+     sleep(Math.random() * contenttime + 10000);
+      logi("开始抓图判断是不是免密支付5")
+         tupian(userid)
+       sleep(9000)
+    }
+
+   if (ladan ===8){
+     sleep(Math.random() * contenttime + 10000);
+      logi("开始抓图判断是不是免密支付8")
+         tupian(userid)
+       sleep(9000)
+
+    }
+
+if (ladan ===6){
+
+ sleep(Math.random() * contenttime + 10000);
+// toast("验证6链接d多少1"+uidip);
+ logi("开始抓图是否支付成功")
+successcvf(userid,uidip)
+
+// toast("验证6链接d多少2"+uidip);
+ sleep(Math.random() * contenttime + 10000);
+}
+if (ladan ===7){
+ sleep(Math.random() * contenttime + 10000);
+back()
+ sleep(Math.random() * contenttime + 10000);
+back()
+ sleep(Math.random() * contenttime + 10000);
+back()
+ sleep(Math.random() * contenttime + 10000);
+back()
+ sleep(Math.random() * contenttime + 10000);
+back()
+ sleep(Math.random() * contenttime + 10000);
+}
+}
+
+
+function tupian(userid){
+initEnv()
+  let img = image.captureFullScreenEx()
+    if (!img) {
+        loge("截图失败")
+        return
+    }
+    // 对图片进行识别
+    let result = ocrLite.ocrImage(img, 20 * 1000, {})
+    if (result) {
+//        logd("ocr结果-》 " + JSON.stringify(result))
+        for (let i = 0; i < result.length; i++) {
+            let value = result[i]
+             let truncatedLabel = value.label.substring(0, 4);
+
+// console.log("找到符合条件的项：", truncatedLabel);
+               // 判断截取后的字符串是否等于 "免密"
+               if (truncatedLabel === "免密支付") {
+                     var result = clickPoint(value.x, value.y);
+                       if (result) {
+                           logd("点击成功");
+
+                           ladan =6
+                       } else {
+                           logd("点击失败");
+                       }
+
+               }else{
+               logd("查找失败");
+
+               }
+              if (truncatedLabel === "立即支付") {
+                               var result = clickPoint(value.x, value.y);
+                                 if (result) {
+                                     logd("点击成功");
+
+                                     ladan =8
+                                 } else {
+                                     logd("点击失败");
+                                 }
+
+                         }else{
+                         logd("查找失败");
+
+                         }
+              if (truncatedLabel === "立即购买") {
+                                           var result = clickPoint(value.x, value.y);
+                                             if (result) {
+                                                 logd("点击成功");
+                                                   sleep(Math.random() * contenttime + 1000);
+                                                var resultb = clickPoint(value.x, value.y);
+
+                                                 ladan =6
+                                                 sleep(1000)
+                                             } else {
+                                                 logd("点击失败");
+                                             }
+
+                                     }else{
+                                     logd("查找失败");
+
+                                     }
+        }
+    } else {
+        logw("未识别到结果")
+    }
+    //回收图片
+    image.recycle(img)
+}
+
+
+function skutupian(userid){
+initEnv()
+  let img = image.captureFullScreenEx()
+    if (!img) {
+        loge("截图失败")
+        return
+    }
+    // 对图片进行识别
+    let result = ocrLite.ocrImage(img, 20 * 1000, {})
+    if (result) {
+        logd("ocr结果-》 " + JSON.stringify(result))
+
+        const customItem = result.find(item => item.label.includes(userid));
+
+        // 输出结果
+        if (customItem) {
+          console.log("找到的条目：", customItem);
+          console.log("confidence 值为：", customItem.x);
+
+             var result = clickPoint(customItem.x, customItem.y);
+                                 if (result) {
+                                     logd("点击成功");
+
+                                     ladan =5
+
+                                 } else {
+                                     logd("点击失败");
+                                 }
+
+
+        } else {
+          console.log("未找到 label 包含 '定制' 的条目");
+        }
+
+        for (let i = 0; i < result.length; i++) {
+            let value = result[i]
+             let truncatedLabel = value.label.substring(0, 4);
+
+             console.log("找到符合条件的项：", truncatedLabel);
+
+
+             logi(userid);
+               // 判断截取后的字符串是否等于 "免密"
+               if (truncatedLabel === userid) {
+                   // 如果等于 "免密"，执行相关操作
+//                   console.log("找到符合条件的项：", value);
+                   // 可以在这里添加更多逻辑，例如处理坐标信息等
+                     var result = clickPoint(value.x, value.y);
+                       if (result) {
+                           logd("点击成功");
+
+                           ladan =5
+                       } else {
+                           logd("点击失败");
+                       }
+
+//              logd("文字 : " + value.label + " x: " + value.x + " y: " + value.y + " width: " + value.width + " height: " + value.height)
+
+               }else{
+
+               console.log("查找失败")
+
+               logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "滑动")
+                                 sleep(1000);
+              var result = swipeToPoint(100, device.getScreenHeight() - 1000, 200, 300, 600)
+               if (result) {
+                      logi("返回切图");
+                      back;
+
+                      sleep(1000);
+                  } else {
+                      toast("滑动失败");
+                      back;
+                      sleep(1000);
+                  }
+
+                                 sleep(1000);
+
+               }
+
+        }
+    } else {
+         console.log("未识别到结果")
+    }
+    //回收图片
+    image.recycle(img)
+}
+
+
+
+function successcvf(userid,uidip){
+initEnv()
+  let img = image.captureFullScreenEx()
+    if (!img) {
+        loge("截图失败")
+        return
+    }
+    // 对图片进行识别
+    let resultb = ocrLite.ocrImage(img, 20 * 1000, {})
+    if (resultb) {
+        logd("ocr结果-》 " + JSON.stringify(resultb))
+        for (let i = 0; i < resultb.length; i++) {
+            let value = resultb[i]
+             let truncatedLabel = value.label.substring(0, 4);
+
+// console.log("找到符合条件的项：", truncatedLabel);
+               // 判断截取后的字符串是否等于 "免密"
+               if (truncatedLabel === "支付成功") {
+
+               console.log("链接id：", uidip);
+                shangchuansuccess(userid,uidip)
+                 sleep(3000)
+                 ladan = 7
+               }
+
+        }
+    } else {
+        logw("未识别到结果")
+    }
+    //回收图片
+    image.recycle(img)
+}
+
+function initEnv() {
+    if (!startEnv()) {
+        loge("自动化启动失败,结束脚本")
+        exit()
+    }
+    if (!image.requestScreenCapture(10000, 0)) {
+        loge("申请截图权限失败,检查是否开启后台弹出,悬浮框等权限")
+        exit()
+    }
+    //申请完权限至少等1s(垃圾设备多加点)再截图,否则会截不到图
+    sleep(1000)
+}
+
+function ladantow(){
+
+ node = bounds(46, 2053, 1033, 2194).getOneNodeInfo(0)
+         if (node) {
+             logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "我的淘宝")
+             sleep(100)
+             node.click()
+             sleep(60000)
+
+         }
+
+
+    if (bz === 0) {
+        let node = clz("android.widget.FrameLayout").desc("搜索栏").getOneNodeInfo(0)
+        if (node) {
+            logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "输入关键词")
+            sleep(100);
+            node.click()
+            sleep(1500);
+            pasteText(id("com.taobao.taobao:id/searchEdit"), data2[0])
+            sleep(100);
+            bz = 1
+        }
+    }
+    if (bz === 1) {
+        node = text("搜索").id("com.taobao.taobao:id/searchbtn").getOneNodeInfo(0)
+        if (node) {
+            logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "搜索")
+            sleep(100);
+            node.click()
+            sleep(2000);
+            bz = 2
+        } else {
+            bz = 0
+        }
+    }
+    if (bz === 2) {
+        node = pkg("com.taobao.taobao").clz("android.view.View").getNodeInfo(0)
+        if (node) {
+            for (let i = sj; i < node.length; i++) {
+                if (node[i].desc === data2[0] + " " + data2[1] + "元") {
+                    logi(timeFormat("yyyy-MM-dd HH:mm:ss") + data2[0] + " " + data2[1] + "元")
+                    sleep(100)
+                    node[i].click()
+                    sleep(1000)
+                    sj = i + 1
+                    bz = 3
+                    break
+                }
+            }
+            if (sj === 0) {
+                ys++
+                logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "滑动")
+                sleep(500);
+                swipeToPoint(200, device.getScreenHeight() - 300, 200, 300, 1000)
+                sleep(1000);
+                if (readConfigInt("gjcys") === ys) {
+                    ys = 0
+                    logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "关键词搜索未找到")
+                    bz = 1001
+                }
+            }
+        }
+    }
+    if (bz === 3) {
+        node = desc("购物车").id("com.taobao.taobao:id/tao_detail_cart_item").getOneNodeInfo(0);
+        if (node) {
+            sleep(100)
+            let node1 = swipeToPoint(200, device.getScreenHeight() - 300, 200, 0, 1000)
+            sleep(2000)
+            if (node1) {
+                bz = 4
+            } else {
+                swipeToPoint(200, device.getScreenHeight() - 300, 200, 0, 1000)
+            }
+        } else {
+            jc++
+            if (jc > 10) {
+                bz = 2
+            }
+        }
+    }
+    if (bz === 4) {
+        node = desc(data2[2]).getOneNodeInfo(0)
+        if (node) {
+            logi(timeFormat("yyyy-MM-dd HH:mm:ss") + data2[2])
+            sleep(500);
+            bz = 5
+            sj = 0
+        } else {
+            node = text(data2[2]).getOneNodeInfo(0)
+            if (node) {
+                logi(timeFormat("yyyy-MM-dd HH:mm:ss") + data2[2])
+                sleep(500);
+                bz = 5
+                sj = 0
+            } else {
+                sleep(500)
+                back()
+                sleep(500)
+                sleep(500)
+                swipeToPoint(200, device.getScreenHeight() - 300, 200, 300, 1000)
+                sleep(1000)
+                sj = 0
+                bz = 2
+            }
+        }
+    }
+    if (bz === 5) {
+        node = text("加入购物车").clz("android.widget.TextView").getOneNodeInfo(0)
+        if (node) {
+            logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "加入购物车")
+            sleep(100);
+            node.click()
+            sleep(2000);
+            bz = 6
+        }
+    }
+    if (bz === 6) {
+        data3 = data2[4].split(",")
+        if (data3.length === 1) {
+            tb_sku_1()
+        }
+        if (data3.length === 2) {
+            tb_sku_2()
+        }
+        if (data3.length === 3) {
+            tb_sku_3()
+        }
+    }
+    if (bz === 7) {
+        node = desc("加入购物车").clz("android.view.View").getOneNodeInfo(0)
+        if (node) {
+            logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "加入购物车")
+            sleep(200);
+            node.click()
+            sleep(2000);
+        }
+        node = text("确认").clz("android.widget.TextView").getOneNodeInfo(0)
+        if (node) {
+            logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "确定")
+            sleep(200);
+            node.click()
+            sleep(2000);
+        }
+        let node1 = text("加入购物车").clz("android.widget.TextView").getOneNodeInfo(0)
+        if (node1) {
+            logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "加入成功")
+            file.writeFile(file.readAllLines(readConfigString("lj2")) + "\r" + data1, readConfigString("lj2"))
+            file.deleteLine(readConfigString("lj1"), 1, null)
+            cs++
+            if (cs === readConfigInt("tjsps")) {
+                sleep(2000);
+                tb_tj()
+            }
+            bz = 1000
+        } else {
+            sleep(500);
+            back()
+            sleep(1000);
+            let node = text("加入购物车").clz("android.widget.TextView").getOneNodeInfo(0)
+            if (node) {
+                sleep(500);
+                node.click()
+                sleep(1000);
+            }
+            bz = 6
+        }
+    }
+    if (bz === 1000) {
+        node = text("订阅").clz("android.widget.TextView").getOneNodeInfo(0)
+        if (node) {
+            bz = 0
+            logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "回到主页")
+        } else {
+            sleep(500)
+            back()
+            sleep(500)
+        }
+    }
+    if (bz === 1001) {
+        node = text("订阅").clz("android.widget.TextView").getOneNodeInfo(0)
+        if (node) {
+            logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "开始店铺搜索")
+            tb_dp()
+        } else {
+            sleep(500)
+            back()
+            sleep(500)
+        }
+    }
+}
+function getNodeText(node) {
+    if (!node) return null;
+
+    // 尝试获取常见属性
+    let textValue = node.text || node.contentDescription || node.hint || node.label || node.value;
+    if (textValue) return textValue;
+
+    // 尝试获取所有自定义属性
+    for (let key in node) {
+        if (node.hasOwnProperty(key) && typeof node[key] === 'string' && node[key].trim() !== '') {
+            return node[key];
+        }
+    }
+
+    // 遍历子节点获取文本内容
+    let childNodes = node.childNodes;
+    for (let i = 0; i < childNodes.length; i++) {
+        textValue = getNodeText(childNodes[i]);
+        if (textValue) return textValue;
+    }
+
+    return null;
+}
+
+function tb_tj() {
+    while (true) {
+        if (ss === 0) {
+            let node = desc("购物车").id("com.taobao.taobao:id/tao_detail_cart_item").getOneNodeInfo(0);
+            if (node) {
+                logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "打开购物车")
+                sleep(100)
+                node.click()
+                sleep(2000)
+                ss = 1
+            }
+        }
+        if (ss === 1) {
+            let node = desc("勾选按钮,全选未选中,双击全选商品").clz("android.widget.LinearLayout").getOneNodeInfo(0);
+            if (node) {
+                logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "全选")
+                sleep(100)
+                node.click()
+                sleep(500)
+                ss = 2
+            }
+        }
+        if (ss === 2) {
+            let node = desc("结算,按钮").clz("android.widget.FrameLayout").getOneNodeInfo(0);
+            if (node) {
+                logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "结算")
+                sleep(100)
+                node.click()
+                sleep(500)
+                ss = 3
+            }
+        }
+        if (ss === 3) {
+            let node = desc("提交订单").clz("android.widget.TextView").getOneNodeInfo(0);
+            if (node) {
+                logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "提交订单")
+                sleep(100)
+                node.click()
+                sleep(500)
+                ss = 4
+            }
+        }
+        if (ss === 4) {
+            let node = desc("退出").clz("android.widget.FrameLayout").getOneNodeInfo(0);
+            if (node) {
+                logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "退出")
+                sleep(100)
+                node.click()
+                sleep(500)
+                ss = 0
+                bz = 1000
+                break
+            }
+        }
+    }
+}
+
+function tb_dp() {
+    while (true) {
+        if (az === 0) {
+            let node = clz("android.widget.FrameLayout").desc("搜索栏").getOneNodeInfo(0)
+            if (node) {
+                logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "输入店铺")
+                sleep(100);
+                node.click()
+                sleep(1500);
+                pasteText(id("com.taobao.taobao:id/searchEdit"), data2[2])
+                sleep(100);
+                az = 1
+            }
+        }
+        if (az === 1) {
+            node = text("搜索").id("com.taobao.taobao:id/searchbtn").getOneNodeInfo(0)
+            if (node) {
+                logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "搜索")
+                sleep(100);
+                node.click()
+                sleep(2000);
+                az = 2
+            }
+        }
+        if (az === 2) {
+            node = text("店铺").id("com.taobao.taobao:id/tab_text").getOneNodeInfo(0)
+            if (node) {
+                logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "店铺")
+                sleep(100);
+                node.click()
+                sleep(2000);
+                az = 3
+            }
+        }
+        if (az === 3) {
+            node = clz("android.view.View").pkg("com.taobao.taobao").getNodeInfo(0)
+            if (node) {
+                logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "进入店铺")
+                sleep(100);
+                node[5].click()
+                sleep(2000);
+                az = 4
+            }
+        }
+        if (az === 4) {
+            let node = text(data2[2]).getOneNodeInfo(0)
+            if (node) {
+                az = 5
+            } else {
+                jc++
+                if (jc > 5) {
+                    jc = 0
+                    logw(timeFormat("yyyy-MM-dd HH:mm:ss") + "没有这家店铺，请手动加购")
+                    device.vibrate(30 * 1000)
+                    sleep(10000)
+                }
+            }
+        }
+        if (az === 5) {
+            let node1 = desc("搜索").clz("android.widget.ImageView").getOneNodeInfo(0)
+            if (node1) {
+                logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "店铺搜索关键词")
+                sleep(500)
+                node1.click()
+                sleep(500)
+                click(text("搜索店铺内宝贝"))
+                sleep(1000)
+                pasteText(id("com.taobao.taobao:id/et_input"), data2[0])
+                sleep(500)
+                let node2 = text("搜索").id("com.taobao.taobao:id/tv_search").getOneNodeInfo(0)
+                if (node2) {
+                    az = 6
+                }
+            } else {
+                jc++
+                if (jc > 10) {
+                    jc = 0
+                    logw(timeFormat("yyyy-MM-dd HH:mm:ss") + "没有这家店铺，请手动加购")
+                    device.vibrate(30 * 1000)
+                    sleep(10000)
+                }
+            }
+        }
+        if (az === 6) {
+            node = text("搜索").id("com.taobao.taobao:id/tv_search").getOneNodeInfo(0)
+            if (node) {
+                logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "店铺搜索")
+                sleep(100);
+                node.click()
+                sleep(2000);
+                az = 7
+            }
+        }
+        if (az === 7) {
+            node = clz("android.widget.TextView").id("com.taobao.taobao:id/title").getOneNodeInfo(0)
+            if (node) {
+                logi(timeFormat("yyyy-MM-dd HH:mm:ss") + "进入宝贝")
+                sleep(100);
+                node.click()
+                sleep(2000);
+                az = 0
+                bz = 5
+                break
+            }
+        }
+    }
+}
+
+function tb_sku_1() {
+    logd("一个sku" + data3)
+    while (true) {
+        let node14 = clz("android.widget.TextView").getNodeInfo(0)
+        if (node14) {
+            for (let i = 0; i < node14.length; i++) {
+                if (node14[i].text + "" === data3 + "") {
+                    logi(timeFormat("yyyy-MM-dd HH:mm:ss") + data3[0])
+                    sleep(100)
+                    logd("找到了")
+                    bz = 7
+                    jc = 0
+                    node14[i].click()
+                    sleep(1000)
+                    break
+                } else {
+                    jc++
+                    if (jc === node14.length) {
+                        jc = 0
+                        sleep(1000);
+                        swipeToPoint(200, device.getScreenHeight() - 600, 200, device.getScreenHeight() - 1000, 800)
+                        sleep(1500);
+                        back()
+                        sleep(1000);
+                        let node = text("加入购物车").clz("android.widget.TextView").getOneNodeInfo(0)
+                        if (node) {
+                            sleep(100);
+                            node.click()
+                            as++
+                            sleep(1000);
+                        }
+                    }
+                }
+            }
+            if (as > 30) {
+                as = 0
+                logw("请手动加购：" + data3)
+                while (true) {
+                    let node1 = text("加入购物车").clz("android.widget.TextView").getOneNodeInfo(0)
+                    if (node1) {
+                        bz = 7
+                        break
+                    }
+                    sleep(1000)
+                }
+            }
+            if (bz === 7) {
+                break
+            }
+        }
+        let node12 = clz("android.view.View").getNodeInfo(0)
+        if (node12) {
+            for (let i = 0; i < node12.length; i++) {
+                if (node12[i].desc + "" === data3 + "") {
+                    logi(timeFormat("yyyy-MM-dd HH:mm:ss") + data3[0])
+                    sleep(100)
+                    logd("找到了")
+                    bz = 7
+                    jc = 0
+                    node12[i].click()
+                    sleep(1000)
+                    break
+                } else {
+                    jc++
+                    if (jc === node12.length) {
+                        jc = 0
+                        sleep(1000);
+                        swipeToPoint(200, device.getScreenHeight() - 600, 200, device.getScreenHeight() - 1000, 800)
+                        sleep(1500);
+                        back()
+                        sleep(1000);
+                        let node = text("加入购物车").clz("android.widget.TextView").getOneNodeInfo(0)
+                        if (node) {
+                            sleep(100);
+                            node.click()
+                            as++
+                            sleep(1000);
+                        }
+                    }
+                }
+            }
+            if (as > 30) {
+                as = 0
+                logw("请手动加购：" + data3)
+                while (true) {
+                    let node1 = text("加入购物车").clz("android.widget.TextView").getOneNodeInfo(0)
+                    if (node1) {
+                        bz = 7
+                        break
+                    }
+                    sleep(1000)
+                }
+            }
+            if (bz === 7) {
+                break
+            }
+        }
+    }
+}
+
+function tb_sku_2() {
+    logd("二个sku" + data3[0] + data3[1])
+    while (true) {
+        if (data3.length === 2) {
+            let node12 = clz("android.view.View").getNodeInfo(0)
+            if (node12) {
+                for (let i = 0; i < node12.length; i++) {
+                    if (node12[i].desc + "" === data3[0] + "" && az === 0) {
+                        logi(timeFormat("yyyy-MM-dd HH:mm:ss") + data3[0])
+                        sleep(1000)
+                        node12[i].click()
+                        jc = 0
+                        az = 1
+                        sleep(1000)
+                        break
+                    } else {
+                        jc++
+                        if (jc === node12.length) {
+                            jc = 0
+                            sleep(1000);
+                            swipeToPoint(200, device.getScreenHeight() - 600, 200, device.getScreenHeight() - 1000, 500)
+                            sleep(1500);
+                            back()
+                            sleep(1000);
+                            let node = text("加入购物车").clz("android.widget.TextView").getOneNodeInfo(0)
+                            if (node) {
+                                sleep(100);
+                                node.click()
+                                as++
+                                sleep(1000);
+                            }
+                        }
+                    }
+                    if (node12[i].desc + "" === data3[1] + "") {
+                        logi(timeFormat("yyyy-MM-dd HH:mm:ss") + data3[1])
+                        sleep(1000)
+                        node12[i].click()
+                        jc = 0
+                        bz = 7
+                        sleep(1000)
+                        break
+                    } else {
+                        jc++
+                        if (jc === node12.length) {
+                            jc = 0
+                            sleep(1000);
+                            swipeToPoint(200, device.getScreenHeight() - 600, 200, device.getScreenHeight() - 1200, 500)
+                            sleep(1500);
+                            back()
+                            sleep(1000);
+                            let node = text("加入购物车").clz("android.widget.TextView").getOneNodeInfo(0)
+                            if (node) {
+                                sleep(100);
+                                node.click()
+                                as++
+                                sleep(1000);
+                            }
+                        }
+                    }
+                }
+                if (as > 50) {
+                    as = 0
+                    logw("请手动加购：" + data3[0] + "+" + data3[1])
+                    while (true) {
+                        let node1 = text("加入购物车").clz("android.widget.TextView").getOneNodeInfo(0)
+                        if (node1) {
+                            bz = 7
+                            break
+                        }
+                        sleep(1000)
+                    }
+                }
+                if (bz === 7) {
+                    az = 0
+                    break
+                }
+            }
+        }
+    }
+}
+
+function tb_sku_3() {
+    logd("三个sku" + data3[0] + data3[1] + data3[2])
+    while (true) {
+        if (az === 0) {
+            let node12 = clz("android.view.View").getNodeInfo(0)
+            if (node12) {
+                for (let i = 0; i < node12.length; i++) {
+                    if (node12[i].desc + "" === data3[0] + "") {
+                        logi(timeFormat("yyyy-MM-dd HH:mm:ss") + data3[0])
+                        sleep(100)
+                        node12[i].click()
+                        jc = 0
+                        az = 1
+                        sleep(1000)
+                        break
+                    } else {
+                        jc++
+                        if (jc === node12.length) {
+                            jc = 0
+                            sleep(1000);
+                            swipeToPoint(200, device.getScreenHeight() - 600, 200, device.getScreenHeight() - 1200, 800)
+                            sleep(1500);
+                            back()
+                            sleep(1000);
+                            let node = text("加入购物车").clz("android.widget.TextView").getOneNodeInfo(0)
+                            if (node) {
+                                sleep(100);
+                                node.click()
+                                as++
+                                sleep(1000);
+                            }
+
+                        }
+                    }
+                }
+            }
+        }
+        if (az === 1) {
+            let node12 = clz("android.view.View").getNodeInfo(0)
+            if (node12) {
+                for (let i = 0; i < node12.length; i++) {
+                    if (node12[i].desc + "" === data3[1] + "") {
+                        logi(timeFormat("yyyy-MM-dd HH:mm:ss") + data3[1])
+                        sleep(100)
+                        node12[i].click()
+                        jc = 0
+                        az = 2
+                        sleep(1000)
+                        break
+                    } else {
+                        jc++
+                        if (jc === node12.length) {
+                            jc = 0
+                            sleep(1000);
+                            swipeToPoint(200, device.getScreenHeight() - 600, 200, device.getScreenHeight() - 1200, 800)
+                            sleep(1000);
+                            back()
+                            sleep(1000);
+                            let node = text("加入购物车").clz("android.widget.TextView").getOneNodeInfo(0)
+                            if (node) {
+                                sleep(100);
+                                node.click()
+                                as++
+                                sleep(2000);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (az === 2) {
+            let node12 = clz("android.view.View").getNodeInfo(0)
+            if (node12) {
+                for (let i = 0; i < node12.length; i++) {
+                    logd(node12[i].desc)
+                    if (node12[i].desc + "" === data3[2] + "") {
+                        logi(timeFormat("yyyy-MM-dd HH:mm:ss") + data3[2])
+                        sleep(100)
+                        node12[i].click()
+                        jc = 0
+                        az = 2
+                        sleep(1000)
+                        break
+                    } else {
+                        jc++
+                        if (jc === node12.length) {
+                            jc = 0
+                            sleep(1000);
+                            swipeToPoint(200, device.getScreenHeight() - 600, 200, device.getScreenHeight() - 1000, 800)
+                            sleep(1000);
+                            back()
+                            sleep(1000);
+                            let node = text("加入购物车").clz("android.widget.TextView").getOneNodeInfo(0)
+                            if (node) {
+                                sleep(100);
+                                node.click()
+                                as++
+                                sleep(2000);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (as > 70) {
+            as = 0
+            logw("请手动加购：" + data3[0] + "+" + data3[1] + "+" + data3[2])
+            while (true) {
+                let node1 = text("加入购物车").clz("android.widget.TextView").getOneNodeInfo(0)
+                if (node1) {
+                    bz = 7
+                    break
+                }
+                sleep(1000)
+            }
+        }
+        if (az === 3) {
+            az = 0
+            bz = 7
+            break
+        }
+    }
+}
+
+
+function ck_dk() {
+    clearLog(-1)
+    setFloatDisplayLineNumber(false)
+    showLogWindow();
+    requestFloatViewPermission(1000);
+    sleep(1000);
+    var m = {
+        "x": 10,
+        "y": device.getScreenHeight() - 910,
+        "w": device.getScreenWidth() - 20,
+        "h": 400, //自定义位置 xy 为起点坐标 w h 宽 高
+        "textSize": 15,  // 日志打印字体大小
+        "backgroundColor": "0x00404040", //自定义颜色值
+        "title": "",
+        "showTitle": false
+    }
+    setLogViewSizeEx(m);
+    sleep(300)
+}
+
+function autoServiceStart(time) {
+    for (let i = 0; i < time; i++) {
+        if (isServiceOk()) {
+            return true;
+        }
+        let started = startEnv();
+        logi("第" + (i + 1) + "次启动服务结果: " + started);
+        if (isServiceOk()) {
+            return true;
+        }
+    }
+    return isServiceOk();
+}
+
+main();
